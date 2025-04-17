@@ -341,7 +341,7 @@
 
 
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -355,17 +355,18 @@ import {
   Platform,
 } from 'react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
-import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
-import { useAppDispatch, useAppSelector } from '../../../store/hooks';
-import { fetchPosts } from '../../../store/slices/postSlice';
-import { COLORS } from '../../../themes/palette';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamsList } from '../../../navigation/AppNavigator';
+import {moderateScale, scale, verticalScale} from 'react-native-size-matters';
+import {useAppDispatch, useAppSelector} from '../../../store/hooks';
+import {fetchPosts} from '../../../store/slices/postSlice';
+import {COLORS} from '../../../themes/palette';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {RootStackParamsList} from '../../../navigation/AppNavigator';
 
 import ViewShot from 'react-native-view-shot';
 import Share from 'react-native-share';
+import RNFS from 'react-native-fs';
 
-const { height: windowHeight, width: screenWidth } = Dimensions.get('window');
+const {height: windowHeight, width: screenWidth} = Dimensions.get('window');
 
 interface IPostsListProp {
   navigation: NativeStackNavigationProp<RootStackParamsList>;
@@ -385,9 +386,7 @@ const PostsList = ({
   profilePhone,
 }: IPostsListProp) => {
   const dispatch = useAppDispatch();
-  const { posts, loading, error, hasMore } = useAppSelector(state => state.posts);
-  const [page, setPage] = useState(1);
-  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const {posts, loading, error} = useAppSelector(state => state.posts);
   const [visibleIndex, setVisibleIndex] = useState<number | null>(null);
   const viewRefs = useRef<ViewShot[]>([]);
 
@@ -396,7 +395,7 @@ const PostsList = ({
   };
 
   const onViewableItemsChanged = useRef(
-    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
+    ({viewableItems}: {viewableItems: ViewToken[]}) => {
       if (viewableItems.length > 0) {
         setVisibleIndex(viewableItems[0].index);
       }
@@ -404,18 +403,8 @@ const PostsList = ({
   ).current;
 
   useEffect(() => {
-    dispatch(fetchPosts({ page: 1, limit: 10 }));
+    dispatch(fetchPosts());
   }, [dispatch]);
-
-  const fetchMore = async () => {
-    if (!isFetchingMore && hasMore) {
-      setIsFetchingMore(true);
-      const nextPage = page + 1;
-      await dispatch(fetchPosts({ page: nextPage, limit: 10 }));
-      setPage(nextPage);
-      setIsFetchingMore(false);
-    }
-  };
 
   const shareImage = async (index: number) => {
     try {
@@ -432,7 +421,7 @@ const PostsList = ({
 
   return (
     <View style={styles.container}>
-      {loading && posts.length === 0 && (
+      {loading && (
         <View style={styles.loadingContainer}>
           <ActivityIndicator />
         </View>
@@ -443,7 +432,7 @@ const PostsList = ({
           {posts.length > 0 ? (
             <FlatList
               data={posts}
-              renderItem={({ item, index }) => {
+              renderItem={({item, index}) => {
                 if (item.type === 'Image' && item.image?.includes('https://')) {
                   const businessNamePosition = parseInt(item.business_name_position, 10) - 1;
                   const logoPosition = parseInt(item.logo_position, 10) - 1;
@@ -454,14 +443,14 @@ const PostsList = ({
                   const textColor = item.text_color || 'black';
                   const textSize = item.text_size?.toString() || '2';
 
-                  const fontSizeMap: { [key: string]: number } = {
+                  const fontSizeMap: {[key: string]: number} = {
                     '1': 12,
                     '2': 15,
                     '3': 16,
                     '4': 20,
                   };
 
-                  const logoSizeMap: { [key: string]: number } = {
+                  const logoSizeMap: {[key: string]: number} = {
                     '1': 50,
                     '2': 60,
                     '3': 70,
@@ -472,10 +461,7 @@ const PostsList = ({
                   const textStyle = {
                     fontSize: fontSizeMap[textSize] || 20,
                     color: textColor,
-                    fontFamily:
-                      item.font_family && item.font_family !== 'null'
-                        ? item.font_family
-                        : undefined,
+                    fontFamily: item.font_family && item.font_family !== 'null' ? item.font_family : undefined,
                     marginLeft: 10,
                   };
 
@@ -483,7 +469,7 @@ const PostsList = ({
                     <>
                       {logoPosition === position && profileLogo && (
                         <Image
-                          source={{ uri: profileLogo }}
+                          source={{uri: profileLogo}}
                           style={{
                             width: logoSize,
                             height: logoSize,
@@ -513,10 +499,10 @@ const PostsList = ({
                           ref={(ref: ViewShot) => {
                             viewRefs.current[index] = ref;
                           }}
-                          options={{ format: 'jpg', quality: 0.9 }}>
+                          options={{format: 'jpg', quality: 0.9}}>
                           <View style={styles.mediaContainer}>
                             <Image
-                              source={{ uri: item.image }}
+                              source={{uri: item.image}}
                               style={StyleSheet.absoluteFillObject}
                               resizeMode="cover"
                             />
@@ -528,15 +514,13 @@ const PostsList = ({
                         </ViewShot>
 
                         <View style={styles.buttonBlock}>
-                          <TouchableOpacity
-                            onPress={() => shareImage(index)}
-                            style={styles.btnStyles}>
+                          <TouchableOpacity onPress={() => shareImage(index)} style={styles.btnStyles}>
                             <Text style={styles.btnText}>Share</Text>
                             <Entypo name="share" size={18} color={COLORS.WHITE} />
                           </TouchableOpacity>
 
                           <TouchableOpacity
-                            onPress={() => navigation.navigate('DownloadShare', { post: item })}
+                            onPress={() => navigation.navigate('DownloadShare', {post: item})}
                             style={styles.btnStyles}>
                             <Entypo name="download" size={18} color={COLORS.WHITE} />
                             <Text style={styles.btnText}>Download</Text>
@@ -552,15 +536,6 @@ const PostsList = ({
               nestedScrollEnabled
               onViewableItemsChanged={onViewableItemsChanged}
               viewabilityConfig={viewabilityConfig}
-              onEndReached={fetchMore}
-              onEndReachedThreshold={0.5}
-              ListFooterComponent={
-                isFetchingMore ? (
-                  <View style={{ paddingVertical: 10 }}>
-                    <ActivityIndicator size="small" color="#888" />
-                  </View>
-                ) : null
-              }
             />
           ) : (
             <Text style={styles.title}>No posts available</Text>
@@ -572,7 +547,7 @@ const PostsList = ({
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: {flex: 1},
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -601,7 +576,7 @@ const styles = StyleSheet.create({
     borderRadius: moderateScale(8),
     padding: moderateScale(10),
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.2,
     shadowRadius: 1.41,
     elevation: 2,
@@ -656,7 +631,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: scale(15),
     marginRight: moderateScale(5),
   },
-  btnText: {
+  btnText: { 
     color: COLORS.WHITE,
     marginLeft: scale(5),
     fontSize: moderateScale(14),
