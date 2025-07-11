@@ -166,6 +166,7 @@ import {scale, verticalScale} from 'react-native-size-matters';
 import axios from 'axios';
 import {P, Span} from '../../themes/Typhography';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import AwesomeAlert from 'react-native-awesome-alerts';
 
 interface ILoginScreenProps {
   navigation: NativeStackNavigationProp<RootStackParamsList, 'Login'>;
@@ -175,6 +176,7 @@ export default function LoginScreen({navigation}: ILoginScreenProps) {
   const [mobileNumber, setMobileNumber] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
 
   useEffect(() => {
     const backAction = () => {
@@ -198,7 +200,7 @@ export default function LoginScreen({navigation}: ILoginScreenProps) {
 
     try {
       const {data: responseData, status} = await axios.post(
-        'https://ashhari.com/bbn/public/api/login',
+        'https://www.brandboostindia.com/api/login',
         {
           phone: mobileNumber,
           password,
@@ -211,12 +213,12 @@ export default function LoginScreen({navigation}: ILoginScreenProps) {
         JSON.stringify(responseData, null, 2),
       );
       if (status === 200 && responseData.message === 'Login Successfully.') {
-        Alert.alert('Success', 'Login successful!');
+        setShowSuccessAlert(true);
+
         await Promise.all([
           AsyncStorage.setItem('userData', JSON.stringify(responseData.data)),
           AsyncStorage.setItem('isLoggedIn', 'true'),
         ]);
-        navigation.navigate('DashBoard');
       } else {
         Alert.alert('Error', responseData.message || 'Something went wrong');
       }
@@ -289,6 +291,58 @@ export default function LoginScreen({navigation}: ILoginScreenProps) {
           </View>
         </View>
       </ScrollView>
+
+      <AwesomeAlert
+  show={showSuccessAlert}
+  showProgress={false}
+  title="Success"
+  message="Login successful!"
+  closeOnTouchOutside={true}
+  closeOnHardwareBackPress={false}
+  showConfirmButton={true}
+  confirmText="OK"
+  confirmButtonColor="#E1306C"
+  contentContainerStyle={{
+    width: 320,
+    borderRadius: 15,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+  }}
+  titleStyle={{
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#222',
+    // marginBottom: 10,
+    textAlign: 'center',
+  }}
+  messageStyle={{
+    fontSize: 16,
+    color: '#555',
+    textAlign: 'center',
+    marginBottom: 15, 
+  }}
+  confirmButtonStyle={{
+    width: 120,
+    height: 35,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+    backgroundColor: '#E1306C',
+  }}
+  confirmButtonTextStyle={{
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+  }}
+  onConfirmPressed={() => {
+    setShowSuccessAlert(false);
+    navigation.navigate('DashBoard');
+  }}
+/>
+
+
     </KeyboardAvoidingView>
   );
 }
@@ -310,7 +364,6 @@ const styles = StyleSheet.create({
   headerWrapper: {
     alignItems: 'center',
     // marginBottom: verticalScale(10),
-   
   },
   logo: {
     width: scale(80),
@@ -330,7 +383,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   signupText: {
-    color:"#E1306C",
+    color: '#E1306C',
     fontWeight: 'bold',
   },
   buttonBlock: {

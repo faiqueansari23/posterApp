@@ -225,7 +225,7 @@ const PosterApp = () => {
   const viewShotRefs = useRef({});
 
   useEffect(() => {
-    fetch('https://ashhari.com/bbn/public/api/show_post')
+    fetch('https://qaswatechnologies.com/april_bb/admin/public/api/show_post')
       .then(response => response.json())
       .then(data => {
         if (data?.categories && Array.isArray(data.categories)) {

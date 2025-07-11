@@ -37,7 +37,7 @@ const CategoriesList = ({setModalVisible}: ICategoriesListProp) => {
     const fetchCategories = async () => {
       try {
         const categoryResponse = await axios.get(
-          'https://ashhari.com/bbn/public/api/categories',
+          'https://qaswatechnologies.com/april_bb/admin/public/api/categories',
         );
         // console.log('categoryResponse->', JSON.stringify(categoryResponse))
         const fetchedCategories = categoryResponse.data.data || [];
@@ -92,61 +92,112 @@ const CategoriesList = ({setModalVisible}: ICategoriesListProp) => {
   );
 
   const extendedCategories = [...categories];
-if (categories.length > 6) {
-    extendedCategories.push({ id: 'more', category: 'More' });
-}
-
+  if (categories.length > 6) {
+    extendedCategories.push({id: 'more', category: 'More'});
+  }
 
   return (
     <View style={styles.container}>
       {loading ? (
         <ActivityIndicator />
       ) : (
-        <View>
-          <View style={styles.containerStory}>
-            <FlatList
-              data={extendedCategories}
-              renderItem={({item}) =>
-                item.id === 'more' ? (
-                  <TouchableOpacity
-                    style={styles.storyContainer}
-                    onPress={() => setModalVisible(true)}>
-                    <View style={[styles.storyBorder, {borderColor: '#aaa'}]}>
-                      <Image
-                        source={require('../../../assets/images/SalmanKhan.webp')}
-                        style={styles.storyImage}
-                      />
-                    </View>
-                    <Text style={styles.storyUsername}>More</Text>
-                  </TouchableOpacity>
-                ) : (
-                  <Story item={item} />
-                )
-              }
-              keyExtractor={(item, index) => `${index}- ${item.id}`}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.storiesList}
-            />
+        <View style={styles.multiRowContainer}>
+          {/* First Row: First 5 Categories */}
+          <View style={styles.row}>
+            {categories.slice(0, 5).map(item => (
+              <TouchableOpacity
+                key={`row1-${item.id}`}
+                style={styles.storyContainer}
+                onPress={() => {
+                  dispatch(selectCategory(item));
+                  handleFetchPostsByCategory(item.id);
+                }}>
+                <View
+                  style={[
+                    styles.storyBorder,
+                    selectedCategory?.id === item.id && {
+                      borderColor: '#E1306C',
+                    },
+                  ]}>
+                  <View
+                    style={[
+                      styles.storyBorder,
+                      selectedCategory?.id === item.id && {
+                        borderColor: '#E1306C',
+                      },
+                    ]}>
+                    <Text style={styles.initialText}>
+                      {item.category?.charAt(0).toUpperCase()}
+                    </Text>
+                  </View>
+                </View>
+                <Text
+                  style={[
+                    styles.storyUsername,
+                    selectedCategory?.id === item.id && {
+                      color: '#E1306C',
+                      fontWeight: 'bold',
+                    },
+                  ]}>
+                  {item.category}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
 
-          {/* <View style={styles.categoryContainer}>
-                    {visibleCategories.map((categoryItem: any, index: any) => {
-                        return (
-                            <TouchableOpacity
-                                onPress={() => dispatch(selectCategory(categoryItem), handleFetchPostsByCategory(categoryItem.id))}
-                                key={index} style={[styles.card, { backgroundColor: selectedCategory?.id === categoryItem.id ? '#21cfe5' : COLORS.OFFWHITE }]}>
-                                <Text style={[styles.categoryName, { color: selectedCategory?.id === categoryItem.id ? COLORS.WHITE : COLORS.DARK }]}>{categoryItem.category}</Text>
-                            </TouchableOpacity>
-                        );
-                    })}
-                    {categories.length > visibleCategories.length && <TouchableOpacity
-                        style={[styles.card, styles.moreButton]}
-                        onPress={() => setModalVisible(true)}
-                    >
-                        <Text style={styles.categoryName}>{'More'}</Text>
-                    </TouchableOpacity>}
-                </View> */}
+          {/* Second Row: Next 4 Categories (6-9) + More */}
+          <View style={styles.row}>
+            {categories.slice(5, 9).map(item => (
+              <TouchableOpacity
+                key={`row2-${item.id}`}
+                style={styles.storyContainer}
+                onPress={() => {
+                  dispatch(selectCategory(item));
+                  handleFetchPostsByCategory(item.id);
+                }}>
+                <View
+                  style={[
+                    styles.storyBorder,
+                    selectedCategory?.id === item.id && {
+                      borderColor: '#E1306C',
+                    },
+                  ]}>
+                  <View
+                    style={[
+                      styles.storyBorder,
+                      selectedCategory?.id === item.id && {
+                        borderColor: '#E1306C',
+                      },
+                    ]}>
+                    <Text style={styles.initialText}>
+                      {item.category?.charAt(0).toUpperCase()}
+                    </Text>
+                  </View>
+                </View>
+                <Text
+                  style={[
+                    styles.storyUsername,
+                    selectedCategory?.id === item.id && {
+                      color: '#E1306C',
+                      fontWeight: 'bold',
+                    },
+                  ]}>
+                  {item.category}
+                </Text>
+              </TouchableOpacity>
+            ))}
+
+            {/* More Button at the end of second row */}
+            <TouchableOpacity
+              key="more-button"
+              style={styles.storyContainer}
+              onPress={() => setModalVisible(true)}>
+              <View style={[styles.storyBorder, {borderColor: '#aaa'}]}>
+                <Text style={styles.initialText}>M</Text>
+              </View>
+              <Text style={styles.storyUsername}>More</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       )}
     </View>
@@ -159,7 +210,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingHorizontal: scale(10),
     justifyContent: 'center',
-    height: Dimensions.get('window').height * 0.12,
+    height: Dimensions.get('window').height * 0.20,
+  
   },
   sectionHeader: {
     fontSize: moderateScale(18),
@@ -184,7 +236,7 @@ const styles = StyleSheet.create({
   moreButton: {
     backgroundColor: '#ddd',
   },
-  ///////////////////////////////////
+
   containerStory: {
     height: 120,
     paddingTop: 5,
@@ -197,27 +249,45 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   storyBorder: {
-    width: 78, // Adjust size to account for padding
-    height: 78, // Adjust size to account for padding
-    borderRadius: 39, // Half of width/height for perfect circle
+    width: 55,
+    height: 55,
+    borderRadius: 39,
     borderWidth: 2,
     justifyContent: 'center',
     alignItems: 'center',
     borderColor: 'gray',
     overflow: 'hidden',
-    padding: 4, // Add padding to create gap
+    // padding: 2,
   },
   storyImage: {
     width: '100%',
     height: '100%',
-    borderRadius: 35, // Make inner image circular
+    borderRadius: 35,
     resizeMode: 'cover',
   },
   storyUsername: {
     marginTop: 5,
-    fontSize: 12,
+    fontSize: 10,
     textAlign: 'center',
     color: 'gray',
+  },
+  multiRowContainer: {
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 0,
+    
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  initialText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
   },
 });
 

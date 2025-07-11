@@ -38,7 +38,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             if (!userDataString) { throw new Error('No user data found.'); }
             const { id } = JSON.parse(userDataString);
             const { data: response } = await axios.get(
-                `https://ashhari.com/april_bb/admin/public/api/getProfile/${id}`
+                `https://www.brandboostindia.com/api/getProfile/${id}`
             );
             console.log('get profile response=>', response.data);
             if (response.status === 'True') {
@@ -66,7 +66,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const categoryResponse = await axios.get('https://ashhari.com/april_bb/admin/public/api/categories');
+                const categoryResponse = await axios.get('https://www.brandboostindia.com/api/categories');
                 const fetchedCategories = categoryResponse.data.data || [];
                 dispatch(setCategories(fetchedCategories));
             } catch (error) {

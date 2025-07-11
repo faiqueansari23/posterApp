@@ -59,7 +59,7 @@ export default function SettingScreen({navigation}: SettingScreenProps) {
       if (!userDataString) throw new Error('No user data found.');
       const {id} = JSON.parse(userDataString);
       const {data: response} = await axios.get(
-        `https://ashhari.com/bbn/public/api/getProfile/${id}`,
+        `https://qaswatechnologies.com/april_bb/admin/public/api/getProfile/${id}`,
       );
       console.log('get profile response=>', response.data);
       if (response.status === 'True') {

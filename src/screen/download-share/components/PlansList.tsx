@@ -18,7 +18,7 @@ const PlansList = () => {
     useEffect(() => {
         const fetchPlans = async () => {
             try {
-                const response = await axios.get('https://ashhari.com/bbn/public/api/show_plans');
+                const response = await axios.get('https://qaswatechnologies.com/april_bb/admin/public/api/show_plans');
                 setPlans(response.data.data);
             } catch (error) {
                 console.error('Error fetching plans:', error);

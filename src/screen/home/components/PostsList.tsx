@@ -337,10 +337,6 @@
 
 // export default PostsList;
 
-
-
-
-
 import React, {useEffect, useRef, useState} from 'react';
 import {
   View,
@@ -365,6 +361,8 @@ import {RootStackParamsList} from '../../../navigation/AppNavigator';
 import ViewShot from 'react-native-view-shot';
 import Share from 'react-native-share';
 import RNFS from 'react-native-fs';
+import {selectCategory} from '../../../store/slices/categoriesSlice';
+import {fetchPostsByCategory} from '../../../store/slices/postSlice';
 
 const {height: windowHeight, width: screenWidth} = Dimensions.get('window');
 
@@ -402,9 +400,17 @@ const PostsList = ({
     },
   ).current;
 
+  const selectedCategory = useAppSelector(
+    state => state.categories.selectedCategory,
+  );
+
   useEffect(() => {
-    dispatch(fetchPosts());
-  }, [dispatch]);
+    if (selectedCategory?.id) {
+      dispatch(fetchPostsByCategory(selectedCategory.id));
+    } else {
+      dispatch(fetchPosts());
+    }
+  }, [dispatch, selectedCategory]);
 
   const shareImage = async (index: number) => {
     try {
@@ -433,12 +439,22 @@ const PostsList = ({
             <FlatList
               data={posts}
               renderItem={({item, index}) => {
-                if (item.type === 'Image' && item.image?.includes('https://')) {
-                  const businessNamePosition = parseInt(item.business_name_position, 10) - 1;
+                const fullImageUrl = item.image?.includes('http')
+                  ? item.image
+                  : item.image
+                  ? `https://www.brandboostindia.com/${item.image}`
+                  : null;
+
+                console.log(`IMAGE URL [${index}]:`, fullImageUrl);
+
+                if (item.type === 'Image' && fullImageUrl) {
+                  const businessNamePosition =
+                    parseInt(item.business_name_position, 10) - 1;
                   const logoPosition = parseInt(item.logo_position, 10) - 1;
                   const phonePosition = parseInt(item.phone_position, 10) - 1;
                   const tagPosition = parseInt(item.tagline_position, 10) - 1;
-                  const socialPosition = parseInt(item.social_media_position, 10) - 1;
+                  const socialPosition =
+                    parseInt(item.social_media_position, 10) - 1;
 
                   const textColor = item.text_color || 'black';
                   const textSize = item.text_size?.toString() || '2';
@@ -456,17 +472,28 @@ const PostsList = ({
                     '3': 70,
                     '4': 80,
                   };
-                  const logoSize = logoSizeMap[item.logo_size?.toString()] || 40;
+                  const logoSize =
+                    logoSizeMap[item.logo_size?.toString()] || 40;
 
                   const textStyle = {
                     fontSize: fontSizeMap[textSize] || 20,
                     color: textColor,
-                    fontFamily: item.font_family && item.font_family !== 'null' ? item.font_family : undefined,
+                    fontFamily:
+                      item.font_family && item.font_family !== 'null'
+                        ? item.font_family
+                        : undefined,
                     marginLeft: 10,
                   };
 
                   const renderContent = (position: number) => (
-                    <>
+                    <View
+                      style={{
+                        width: 330,
+                        flexDirection: 'row',
+                        flexWrap: 'wrap',
+                        alignItems: 'center',
+                        maxHeight: 70,
+                      }}>
                       {logoPosition === position && profileLogo && (
                         <Image
                           source={{uri: profileLogo}}
@@ -489,7 +516,7 @@ const PostsList = ({
                       {socialPosition === position && (
                         <Text style={textStyle}>{profileSocial}</Text>
                       )}
-                    </>
+                    </View>
                   );
 
                   return (
@@ -502,27 +529,51 @@ const PostsList = ({
                           options={{format: 'jpg', quality: 0.9}}>
                           <View style={styles.mediaContainer}>
                             <Image
-                              source={{uri: item.image}}
-                              style={StyleSheet.absoluteFillObject}
+                              source={
+                                fullImageUrl
+                                  ? {uri: fullImageUrl}
+                                  : require('../../../assets/images/active-devices.png')
+                              }
+                              style={{
+                                width: screenWidth - 40,
+                                height: screenWidth - 10,
+                                borderRadius: 10,
+                              }}
                               resizeMode="cover"
                             />
                             <View style={styles.overlay}>
-                              <View style={styles.topOverlay}>{renderContent(0)}</View>
-                              <View style={styles.bottomOverlay}>{renderContent(1)}</View>
+                              <View style={styles.topOverlay}>
+                                {renderContent(0)}
+                              </View>
+                              <View style={styles.bottomOverlay}>
+                                {renderContent(1)}
+                              </View>
                             </View>
                           </View>
                         </ViewShot>
 
                         <View style={styles.buttonBlock}>
-                          <TouchableOpacity onPress={() => shareImage(index)} style={styles.btnStyles}>
+                          <TouchableOpacity
+                            onPress={() => shareImage(index)}
+                            style={styles.btnStyles}>
                             <Text style={styles.btnText}>Share</Text>
-                            <Entypo name="share" size={18} color={COLORS.WHITE} />
+                            <Entypo
+                              name="share"
+                              size={18}
+                              color={COLORS.WHITE}
+                            />
                           </TouchableOpacity>
 
                           <TouchableOpacity
-                            onPress={() => navigation.navigate('DownloadShare', {post: item})}
+                            onPress={() =>
+                              navigation.navigate('DownloadShare', {post: item})
+                            }
                             style={styles.btnStyles}>
-                            <Entypo name="download" size={18} color={COLORS.WHITE} />
+                            <Entypo
+                              name="download"
+                              size={18}
+                              color={COLORS.WHITE}
+                            />
                             <Text style={styles.btnText}>Download</Text>
                           </TouchableOpacity>
                         </View>
@@ -530,6 +581,7 @@ const PostsList = ({
                     </View>
                   );
                 }
+
                 return null;
               }}
               keyExtractor={item => item.id.toString()}
@@ -602,12 +654,13 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     flexDirection: 'column',
     maxHeight: 25,
+    width: 320,
     padding: 0,
     margin: 0,
   },
   bottomOverlay: {
     position: 'absolute',
-    bottom: 0,
+    bottom: 12,
     left: 0,
     right: 10,
     flexDirection: 'row',
@@ -631,7 +684,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: scale(15),
     marginRight: moderateScale(5),
   },
-  btnText: { 
+  btnText: {
     color: COLORS.WHITE,
     marginLeft: scale(5),
     fontSize: moderateScale(14),

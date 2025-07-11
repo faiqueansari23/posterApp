@@ -24,6 +24,7 @@ import {ImageOrVideo} from 'react-native-image-crop-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {launchImageLibrary} from 'react-native-image-picker';
 import ImagePicker from 'react-native-image-crop-picker';
+import AwesomeAlert from 'react-native-awesome-alerts';
 
 interface UserProfileScreenProps {
   navigation: NativeStackNavigationProp<RootStackParamsList>;
@@ -46,6 +47,7 @@ export default function UserProfileScreen({
     city: '',
     state: '',
   });
+  const [showLogoutAlert, setShowLogoutAlert] = useState(false);
 
   const fetchProfileData = async () => {
     try {
@@ -138,6 +140,15 @@ export default function UserProfileScreen({
     );
   }
 
+  // Logout
+  const handleLogout = async () => {
+    await AsyncStorage.multiRemove(['userData', 'isLoggedIn']);
+    navigation.reset({
+      index: 0,
+      routes: [{name: 'Login'}],
+    });
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor={COLORS.BLACK} barStyle="light-content" />
@@ -174,21 +185,28 @@ export default function UserProfileScreen({
           </Text>
         </View>
         <TouchableOpacity
+          // onPress={() => {
+          //   Alert.alert('Logout', 'Are you sure you want to logout?', [
+          //     {
+          //       text: 'Cancel',
+          //       style: 'cancel',
+          //     },
+          //     {
+          //       text: 'Yes',
+          //       onPress: handleLogout,
+          //     },
+          //   ]);
+          // }}
           onPress={() => {
-            Alert.alert('Faique', 'Are you sure you want to logout?');
+            setShowLogoutAlert(true);
           }}
           style={{flexDirection: 'row', alignItems: 'center'}}>
-          <TouchableOpacity
-            onPress={() => {
-              Alert.alert('Faique', 'Are you sure you want to logout?');
-            }}>
-            <AntDesign
-              name="logout"
-              size={17}
-              color={COLORS.WHITE}
-              style={{marginTop: verticalScale(5)}}
-            />
-          </TouchableOpacity>
+          <AntDesign
+            name="logout"
+            size={17}
+            color={COLORS.WHITE}
+            style={{marginTop: verticalScale(5)}}
+          />
           <Text
             style={{
               color: COLORS.WHITE,
@@ -213,72 +231,72 @@ export default function UserProfileScreen({
                         </TouchableOpacity>
                     </View> */}
 
-<View
-  style={{
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: verticalScale(4),
-  }}>
-  {/* Left Side - Plus Icon */}
-  <TouchableOpacity
-    style={{
-      width: moderateScale(50),
-      height: moderateScale(50),
-      borderRadius: moderateScale(8),
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginRight: moderateScale(10),
-    }}
-    onPress={() =>
-      ImagePicker.openPicker({
-        width: 300, // Output image ka width
-        height: 300, // Output image ka height (square)
-        cropping: true, // Cropping enable
-        cropperCircleOverlay: true, // Circle shape mein crop
-        mediaType: 'photo',
-      })
-        .then(image => {
-          setProfileLogo(image.path); // Cropped image ka path
-        })
-        .catch(error => {
-          console.log('Image Picker Error: ', error);
-        })
-    }>
-    <Text
-      style={{
-        color: '#000',
-        fontSize: moderateScale(40),
-      }}>
-      +
-    </Text>
-  </TouchableOpacity>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginVertical: verticalScale(4),
+            }}>
+            {/* Left Side - Plus Icon */}
+            <TouchableOpacity
+              style={{
+                width: moderateScale(50),
+                height: moderateScale(50),
+                borderRadius: moderateScale(8),
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginRight: moderateScale(10),
+              }}
+              onPress={() =>
+                ImagePicker.openPicker({
+                  width: 300, // Output image ka width
+                  height: 300, // Output image ka height (square)
+                  cropping: true, // Cropping enable
+                  cropperCircleOverlay: true, // Circle shape mein crop
+                  mediaType: 'photo',
+                })
+                  .then(image => {
+                    setProfileLogo(image.path); // Cropped image ka path
+                  })
+                  .catch(error => {
+                    console.log('Image Picker Error: ', error);
+                  })
+              }>
+              <Text
+                style={{
+                  color: '#000',
+                  fontSize: moderateScale(40),
+                }}>
+                +
+              </Text>
+            </TouchableOpacity>
 
-  {/* Right Side - Image Display */}
-  <View
-    style={{
-      width: moderateScale(65),
-      height: moderateScale(65),
-      borderRadius: moderateScale(32.5),
-      borderWidth: 1,
-      borderColor: '#E1306C',
-      padding: moderateScale(1), // 1px gap ke liye padding
-      justifyContent: 'center',
-      alignItems: 'center',
-      overflow: 'hidden',
-    }}>
-    <Avatar2
-      source={profileLogo ? {uri: profileLogo} : undefined}
-      style={{
-        width: moderateScale(63), // 65 - 2*padding (1px each side)
-        height: moderateScale(63), // 65 - 2*padding (1px each side)
-        borderRadius: moderateScale(31.5), // Circle shape ke liye half of width/height
-        resizeMode: 'cover', // Crop hone ke baad fit hogi
-        opacity: 0.8,
-      }}
-    />
-  </View>
-</View>
+            {/* Right Side - Image Display */}
+            <View
+              style={{
+                width: moderateScale(65),
+                height: moderateScale(65),
+                borderRadius: moderateScale(32.5),
+                borderWidth: 1,
+                borderColor: '#E1306C',
+                padding: moderateScale(1), // 1px gap ke liye padding
+                justifyContent: 'center',
+                alignItems: 'center',
+                overflow: 'hidden',
+              }}>
+              <Avatar2
+                source={profileLogo ? {uri: profileLogo} : undefined}
+                style={{
+                  width: moderateScale(63), // 65 - 2*padding (1px each side)
+                  height: moderateScale(63), // 65 - 2*padding (1px each side)
+                  borderRadius: moderateScale(31.5), // Circle shape ke liye half of width/height
+                  resizeMode: 'cover', // Crop hone ke baad fit hogi
+                  opacity: 0.8,
+                }}
+              />
+            </View>
+          </View>
 
           <PersonalComponent
             number={formData.whatsappno}
@@ -299,6 +317,37 @@ export default function UserProfileScreen({
             buttonStyle={styles.button}
           />
         </ScrollView>
+
+        <AwesomeAlert
+          show={showLogoutAlert}
+          showProgress={false}
+          title="Logout"
+          message="Are you sure you want to logout?"
+          closeOnTouchOutside={true}
+          closeOnHardwareBackPress={false}
+          showCancelButton={true}
+          showConfirmButton={true}
+          cancelText="Cancel"
+          confirmText="Yes"
+          confirmButtonColor="#E1306C"
+          cancelButtonStyle={{
+            width: 100,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+          confirmButtonStyle={{
+            width: 100,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+          onCancelPressed={() => {
+            setShowLogoutAlert(false);
+          }}
+          onConfirmPressed={() => {
+            setShowLogoutAlert(false);
+            handleLogout();
+          }}
+        />
       </View>
     </View>
   );
@@ -360,6 +409,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#E1306C',
     alignSelf: 'center',
     marginTop: 30,
-    borderRadius:50
+    borderRadius: 50,
   },
 });

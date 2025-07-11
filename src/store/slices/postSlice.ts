@@ -30,17 +30,23 @@ const initialState: PostsState = {
 
 // Thunks for async actions
 export const fetchPosts = createAsyncThunk('posts/fetchPosts', async () => {
-    const response = await axios.get('https://ashhari.com/april_bb/admin/public/api/show_post');
+    const response = await axios.get('https://www.brandboostindia.com/api/show_post');
     console.log("Response from API:", response.data);
     
     return response.data.data || [];
 });
 
 
-export const fetchPostsByCategory = createAsyncThunk('posts/fetchPostsByCategory', async (categoryId: number) => {
-    const response = await axios.get(`https://ashhari.com/april_bb/admin/public/api/show_post?category_id=${categoryId}`);
-    return response.data.categories || [];
-});
+export const fetchPostsByCategory = createAsyncThunk(
+    'posts/fetchPostsByCategory',
+    async (categoryId: number) => {
+      const response = await axios.get(
+        `https://www.brandboostindia.com/api/show_post?category_id=${categoryId}`
+      );
+      return response.data.data || []; // 👈 yeh fix kiya gaya
+    }
+  );
+  
 
 const postsSlice = createSlice({
     name: 'posts', 
